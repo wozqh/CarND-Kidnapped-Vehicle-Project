@@ -233,20 +233,28 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	for (int i =0;i<particles.size();i++){
 		vector<LandmarkObs> transformed_obs;
 		particles[i].weight = 1.0;
-/*		for(int j =0;j<observations.size();j++){
+		for(unsigned int j =0;j<observations.size();j++){
 			LandmarkObs transformed_ob;
 			transformed_ob.x = observations[j].x * cos(particles[i].theta) - observations[i].y * sin(particles[i].theta) + particles[i].x;
 			transformed_ob.y = observations[j].y * sin(particles[i].theta) + observations[i].y * cos(particles[i].theta) + particles[i].y;
 			transformed_ob.id = observations[j].id;
 
-			transformed_obs.push_back(transformed_ob);*/
+			transformed_obs.push_back(transformed_ob{transformed_ob.id,transformed_ob.x,transformed_ob.y});
 
-		for (LandmarkObs observs : observations) {
+			cout<<"transformed_ob.x = "<<transformed_ob.x<<endl;
+			cout<<"transformed_ob.y = "<<transformed_ob.y<<endl;
+			cout<<"transformed_ob.id = "<<transformed_ob.id<<endl;
+
+/*		for (LandmarkObs observs : observations) {
             LandmarkObs transformed_ob;
             transformed_ob.id = observs.id;
             transformed_ob.x = observs.x * cos(particles[i].theta) - observs.y * sin(particles[i].theta) + particles[i].x;
             transformed_ob.y = observs.x * sin(particles[i].theta) + observs.y * cos(particles[i].theta) + particles[i].y;
             transformed_obs.push_back(transformed_ob);
+
+            cout<<"transformed_ob.x = "<<transformed_ob.x<<endl;
+			cout<<"transformed_ob.y = "<<transformed_ob.y<<endl;
+			cout<<"transformed_ob.id = "<<transformed_ob.id<<endl;*/
 
 			// calculate distance
 			vector <double> distances;
