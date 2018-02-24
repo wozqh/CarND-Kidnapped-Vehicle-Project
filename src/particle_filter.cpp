@@ -127,122 +127,11 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   and the following is a good resource for the actual equation to implement (look at equation 
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
-	
-/*	double total = 0.0;
-
-	for (int i = 0; i < num_particles;i++){
-
-		// for each particle get x,y and theta
-		double par_x = particles[i].x;
-		double par_y = particles[i].y;
-		double par_theta = particles[i].theta;
-
-		vector<LandmarkObs> transformed_obs;
-		vector<LandmarkObs> range_landmarks;
-
-		// transform coordinates of landmarks from VEHICLES's coordinate system to MAP's coordinate
-		// system
-		
-		for (int j = 0; j< observations.size();j++){
-			LandmarkObs transformed_ob;
-            
-			double tran_x = cos(par_theta)*observations[j].x - sin(par_theta)*observations[j].y + par_x;
-			double tran_y = sin(par_theta)*observations[j].x - cos(par_theta)*observations[j].y + par_y;
-
-			transformed_ob.x = tran_x;
-			transformed_ob.y = tran_y;
-			transformed_ob.id = observations[j].id;
-
-			//add transform to vector
-			transformed_obs.push_back(transformed_ob);
-
-					// choose landmarks within sensor range
-		for (int k = 0;k<map_landmarks.landmark_list.size();k++){
-			int range_landmark_id = map_landmarks.landmark_list[k].id_i;
-			float range_landmark_x = map_landmarks.landmark_list[k].x_f;
-			float range_landmark_y = map_landmarks.landmark_list[k].y_f;
-
-			// calculate the distance using dist()
-			float range_dist = dist(range_landmark_x,range_landmark_y,par_x,par_y);
-
-			if(range_dist < sensor_range){
-				LandmarkObs range_landmark;
-				range_landmark.id = range_landmark_id;
-				range_landmark.x = range_landmark_x;
-				range_landmark.y = range_landmark_y;
-
-				range_landmarks.push_back(range_landmark);
-			}
-		}
-
-		//dataAssociation(range_landmarks,transformed_obs);
-
-		//init weight
-		particles[i].weight = 1.0;
-
-		for(int l=0;l<transformed_obs.size();l++){
-			int associate_id = transformed_obs[l].id;
-			double trans_x = transformed_obs[l].x;
-			double trans_y = transformed_obs[l].y;
-
-			particles[i].associations.push_back(range_landmarks[associate_id].id);
-			particles[i].sense_x.push_back(trans_x);
-			particles[i].sense_y.push_back(trans_y);
-
-			// get the range landmarks x,y associate with current observation
-			for (int m=0;m<range_landmarks.size();m++){
-				if(range_landmarks[m].id == associate_id)
-				{
-					double assos_x = range_landmarks[m].x;
-					double assos_y = range_landmarks[m].y;
-
-					double std_x = std_landmark[0];
-					double std_y = std_landmark[1];
-
-					//double uppart = pow(trans_x-assos_x,2)/(2*pow(std_x,2))+pow(trans_y - assos_y,2)/(2*pow(std_y,2));
-					//double Update_weight = exp(-uppart) / (2*M_PI*std_x*std_y);
-
-					//double Update_weight = (1/(2*std_x*std_y*M_PI))*exp(-(pow(assos_x - trans_x,2)/
-					//	(2*pow(std_x,2)) + (pow(assos_y - trans_y,2) / (2 * pow(std_y,2)))));
-                    
-                    double uppart = 1./(std_x*std_y*M_PI*2);
-                    double dwpart = -1*(pow((transformed_ob.x-assos_x),2)/(2*pow(std_x,2)) + pow((transformed_ob.y-assos_y),2)/(2*pow(std_y,2)));
-
-					//multiple the weight
-					particles[i].weight *= uppart *exp(dwpart);
-					//particles[i].weight *= Update_weight;
-
-					//cout <<"particles[i].weight"<<particles[i].weight<<endl;
-				}
-			}
-		}
-
-		//total += particles[i].weight;
-		//weights.push_back(particles[i].weight);
-		}
-	}
-
-/*	for (int n=0;n<particles.size();n++){
-		weights[n] = particles[n].weight / total;
-		particles[n].weight = weights[n];
-	}*/
-
 
     // update 
 	for (int i =0;i<particles.size();i++){
 		vector<LandmarkObs> transformed_obs;
 		particles[i].weight = 1.0;
-		// for(int j =0;j<observations.size();j++){
-		// 	LandmarkObs transformed_ob;
-		// 	transformed_ob.x = observations[j].x * cos(particles[i].theta) - observations[i].y * sin(particles[i].theta) + particles[i].x;
-		// 	transformed_ob.y = observations[j].y * sin(particles[i].theta) + observations[i].y * cos(particles[i].theta) + particles[i].y;
-		// 	transformed_ob.id = observations[j].id;
-
-		// 	transformed_obs.push_back(transformed_ob);
-
-		// 	cout<<"transformed_ob.x = "<<transformed_ob.x<<endl;
-		// 	cout<<"transformed_ob.y = "<<transformed_ob.y<<endl;
-		// 	cout<<"transformed_ob.id = "<<transformed_ob.id<<endl;
 
 		for (LandmarkObs observs : observations) {
             LandmarkObs transformed_ob;
@@ -264,13 +153,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				double distance = dist(range_landmark_x,range_landmark_y,transformed_ob.x,transformed_ob.y);
 				distances.push_back(distance);
 			}
-
-/*			// calculate distance to each landmark
-            vector <double> distances;
-            for (Map::single_landmark_s landmks : map_landmarks.landmark_list) {
-                double distance = dist(landmks.x_f, landmks.y_f, transformed_ob.x, transformed_ob.y);
-                distances.push_back(distance);
-            }*/
 
 			// find the closest landmark id
             vector<double>::iterator result = min_element(begin(distances), end(distances));
@@ -305,9 +187,6 @@ void ParticleFilter::resample() {
 	uniform_int_distribution<> intdisc{0,num_particles-1};
 	int index = intdisc(gen);
 	double bite = 0.0;
-	//double weight_max = *max_element(weights.begin(),weights.end());
-
-	//uniform_real_distribution<> w_unifor{0,1};
 
     double weight_max =0;
 	for (int i=0;i<particles.size();i++){
@@ -317,8 +196,7 @@ void ParticleFilter::resample() {
 
 
     uniform_real_distribution<double> w_unifor(0,2*weight_max);
-    //discrete_distribution<> w_unifor(0,weight_max);
-    //discrete_distribution<> w_unifor(weights.begin(),weights.end());
+
 	for(int j=0;j<num_particles;j++){
 		bite += w_unifor(real_eng);
 		while (particles[index].weight<bite){
